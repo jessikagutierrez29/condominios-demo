@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import { useApartments } from "../hooks/useApartments";
@@ -7,9 +7,8 @@ import { useUnitTypes } from "../../unit-types/hooks/useUnitTypes";
 export default function ApartmentCreatePage() {
   const navigate = useNavigate();
 
-  const condominiumId = 1; // luego se toma del auth
+  const condominiumId = 1;
 
-  // Datos reales
   const {
     apartments,
     loading: loadingApartments,
@@ -18,60 +17,27 @@ export default function ApartmentCreatePage() {
 
   const { unitTypes, loading: loadingUnitTypes } = useUnitTypes(condominiumId);
 
-  // Form state (mapeado a backend)
   const [torre, setTorre] = useState("");
   const [piso, setPiso] = useState("");
   const [numero, setNumero] = useState("");
   const [unitTypeId, setUnitTypeId] = useState("");
 
-  // Campos UI que aún NO están en backend (se mantienen solo visualmente)
   const [activoCobro, setActivoCobro] = useState(true);
   const [observaciones, setObservaciones] = useState("");
 
-  // Validation
-  const [numeroDuplicado, setNumeroDuplicado] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
 
-  // Valida duplicado en vivo
-  useEffect(() => {
-    setSubmitError("");
-
-    if (!torre || !numero.trim()) {
-      setNumeroDuplicado(false);
-      return;
-    }
-
-    const exists = apartments.some(
+  const numeroDuplicado = useMemo(() => {
+    if (!torre || !numero.trim()) return false;
+    return apartments.some(
       (a) =>
         String(a.tower || "").trim().toLowerCase() ===
           String(torre || "").trim().toLowerCase() &&
         String(a.number || "").trim().toLowerCase() ===
           String(numero || "").trim().toLowerCase()
     );
-
-    setNumeroDuplicado(exists);
   }, [torre, numero, apartments]);
-
-  // Limpia errores al editar
-  useEffect(() => {
-    setErrors((prev) => {
-      if (!prev || Object.keys(prev).length === 0) return prev;
-
-      const next = { ...prev };
-
-      if (torre && next.torre) delete next.torre;
-      if (String(piso).trim() !== "" && next.piso) delete next.piso;
-      if (numero.trim() && next.numero) delete next.numero;
-      if (unitTypeId && next.unitTypeId) delete next.unitTypeId;
-
-      if (!numeroDuplicado && next.numero === "Este número ya existe en la torre.") {
-        delete next.numero;
-      }
-
-      return next;
-    });
-  }, [torre, piso, numero, unitTypeId, numeroDuplicado]);
 
   const canSubmit =
     torre.trim() &&
@@ -103,10 +69,9 @@ export default function ApartmentCreatePage() {
     if (!ok) return;
 
     try {
-      // Payload real del backend
       await registerApartment({
         unit_type_id: Number(unitTypeId),
-        tower: String(torre).trim(), // ✅ sigue guardando igual
+        tower: String(torre).trim(),
         floor: Number(piso),
         number: String(numero).trim(),
         is_active: true,
@@ -122,7 +87,7 @@ export default function ApartmentCreatePage() {
   const busy = loadingApartments || loadingUnitTypes;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="w-full">
       <div className="w-full max-w-4xl mx-auto p-6">
         <PageHeader title="Registrar Apartamento" showBack />
 
@@ -132,18 +97,15 @@ export default function ApartmentCreatePage() {
           </div>
         )}
 
-        {/* ERROR GLOBAL */}
         {submitError && (
           <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
             {submitError}
           </div>
         )}
 
-        {/* 1. UBICACIÓN */}
         <SectionHeader number="1" title="Ubicación" />
 
         <CardBlock>
-          {/* ✅ Torre editable */}
           <div>
             <FieldLabel label="Torre / Bloque" danger={Boolean(errors.torre)} />
             <input
@@ -161,7 +123,6 @@ export default function ApartmentCreatePage() {
             {errors.torre && <FieldError>{errors.torre}</FieldError>}
           </div>
 
-          {/* Piso / Número */}
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <FieldLabel label="Piso" danger={Boolean(errors.piso)} />
@@ -212,12 +173,8 @@ export default function ApartmentCreatePage() {
             </div>
           </div>
 
-          {/* Tipo de Unidad */}
           <div className="mt-6">
-            <FieldLabel
-              label="Tipo de Unidad"
-              danger={Boolean(errors.unitTypeId)}
-            />
+            <FieldLabel label="Tipo de Unidad" danger={Boolean(errors.unitTypeId)} />
             <select
               className={`mt-2 w-full h-14 rounded-2xl bg-white px-4 text-slate-900 outline-none focus:ring-2 ${
                 errors.unitTypeId
@@ -239,7 +196,6 @@ export default function ApartmentCreatePage() {
           </div>
         </CardBlock>
 
-        {/* 2. ADMINISTRATIVOS */}
         <SectionHeader number="2" title="Administrativos" />
 
         <CardBlock>
@@ -252,7 +208,6 @@ export default function ApartmentCreatePage() {
             <Switch checked={activoCobro} onChange={setActivoCobro} />
           </div>
 
-          {/* Observaciones (solo UI, no backend todavía) */}
           <div className="mt-5">
             <FieldLabel label="Observaciones (opcional)" danger={false} />
             <textarea
@@ -269,11 +224,7 @@ export default function ApartmentCreatePage() {
             type="button"
             disabled={!canSubmit || busy}
             onClick={handleSave}
-            className={`w-full sm:w-[520px] rounded-2xl py-4 text-lg font-semibold shadow-xl transition ${
-              canSubmit && !busy
-                ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
-                : "bg-slate-200 text-slate-500 cursor-not-allowed"
-            }`}
+            className="app-button-primary w-full sm:w-[520px] py-4 text-lg font-semibold"
           >
             Guardar Apartamento
           </button>
@@ -282,8 +233,6 @@ export default function ApartmentCreatePage() {
     </div>
   );
 }
-
-/* ----------------- UI Helpers ----------------- */
 
 function SectionHeader({ number, title }) {
   return (
@@ -300,7 +249,7 @@ function SectionHeader({ number, title }) {
 
 function CardBlock({ children }) {
   return (
-    <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="mt-4 app-card p-5">
       <div className="space-y-4">{children}</div>
     </div>
   );

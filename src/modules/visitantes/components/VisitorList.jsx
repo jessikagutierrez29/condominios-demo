@@ -1,7 +1,5 @@
 const Card = ({ children, className = "" }) => (
-  <div className={`rounded-3xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
-    {children}
-  </div>
+  <div className={`app-card p-5 ${className}`}>{children}</div>
 );
 
 function EmptyState() {
@@ -33,11 +31,7 @@ function Row({ visit, onCheckout }) {
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 hover:shadow-sm transition">
-
-      {/* IZQUIERDA */}
       <div className="flex items-center gap-4 min-w-0">
-
-        {/* FOTO */}
         <div className="h-14 w-14 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
           {visit.photo ? (
             <img
@@ -50,11 +44,8 @@ function Row({ visit, onCheckout }) {
           )}
         </div>
 
-        {/* INFO */}
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-900 truncate">
-            {name}
-          </p>
+          <p className="text-sm font-bold text-slate-900 truncate">{name}</p>
 
           <p className="text-xs text-slate-500 truncate">
             {doc ? `Doc: ${doc} • ` : ""}
@@ -69,9 +60,7 @@ function Row({ visit, onCheckout }) {
         </div>
       </div>
 
-      {/* DERECHA */}
       <div className="flex items-center">
-
         {isActive ? (
           <button
             type="button"
@@ -85,11 +74,11 @@ function Row({ visit, onCheckout }) {
             Cerrada
           </span>
         )}
-
       </div>
     </div>
   );
 }
+
 export default function VisitorsList({ visits = [], onCheckout }) {
   return (
     <Card>

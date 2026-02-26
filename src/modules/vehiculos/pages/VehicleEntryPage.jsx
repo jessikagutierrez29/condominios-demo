@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../service/api";
+import {
+  demoFetchApartments,
+  demoFetchVehicleTypes,
+  demoFetchSecurityUsers,
+  demoFetchVehicles,
+  demoCreateVehicle,
+  demoFetchVehicleEntries,
+  demoCreateVehicleEntry,
+  demoCheckoutVehicleEntry,
+} from "../../../service/demoStore";
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 import { ArrowLeft, Camera, Car } from "lucide-react";
 
 const condominiumId = 1;
@@ -8,12 +20,7 @@ const condominiumId = 1;
 /* ---------------- UI helpers (mismo estilo que Visitantes) ---------------- */
 
 const Card = ({ children, className = "" }) => (
-  <div
-    className={[
-      "rounded-3xl border border-slate-200 bg-white p-6 shadow-sm",
-      className,
-    ].join(" ")}
-  >
+  <div className={["app-card p-6", className].join(" ")}>
     {children}
   </div>
 );
@@ -31,8 +38,7 @@ const FieldLabel = ({ children, required }) => (
   </div>
 );
 
-const inputBase =
-  "w-full h-12 rounded-2xl bg-white border border-slate-200 px-4 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200";
+const inputBase = "app-input";
 
 function EmptyState({ title, subtitle }) {
   return (
@@ -69,13 +75,11 @@ export default function VehicleEntryPage() {
 
   // Evidencia demo (solo UI)
   const fileRef = useRef(null);
-  const [evidenceFile, setEvidenceFile] = useState(null);
   const [evidencePreview, setEvidencePreview] = useState("");
 
   useEffect(() => {
     loadInitialData();
     loadActiveEntries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const ownerTypeMap = useMemo(
@@ -91,15 +95,26 @@ export default function VehicleEntryPage() {
   async function loadInitialData() {
     setLoadingInit(true);
     try {
-      const [typesRes, apartmentsRes, usersRes] = await Promise.all([
-        api.get("/security/vehicle-types"),
-        api.get(`/core/apartments?condominium_id=${condominiumId}`),
-        api.get(`/core/users/security/${condominiumId}`),
-      ]);
+      if (DEMO_MODE) {
+        const [typesRes, apartmentsRes, usersRes] = await Promise.all([
+          demoFetchVehicleTypes(condominiumId),
+          demoFetchApartments(condominiumId),
+          demoFetchSecurityUsers(condominiumId),
+        ]);
+        setVehicleTypes(typesRes.data || []);
+        setApartments(apartmentsRes.data || []);
+        setSecurityUsers(usersRes || []);
+      } else {
+        const [typesRes, apartmentsRes, usersRes] = await Promise.all([
+          api.get("/security/vehicle-types"),
+          api.get(`/core/apartments?condominium_id=${condominiumId}`),
+          api.get(`/core/users/security/${condominiumId}`),
+        ]);
 
-      setVehicleTypes(typesRes.data || []);
-      setApartments(apartmentsRes.data || []);
-      setSecurityUsers(usersRes.data || []);
+        setVehicleTypes(typesRes.data || []);
+        setApartments(apartmentsRes.data || []);
+        setSecurityUsers(usersRes.data || []);
+      }
     } catch (err) {
       console.error("Error cargando datos:", err);
     } finally {
@@ -110,7 +125,9 @@ export default function VehicleEntryPage() {
   async function loadActiveEntries() {
     setLoadingActive(true);
     try {
-      const entriesRes = await api.get(`/security/vehicle-entries/${condominiumId}`);
+      const entriesRes = DEMO_MODE
+        ? await demoFetchVehicleEntries(condominiumId)
+        : await api.get(`/security/vehicle-entries/${condominiumId}`);
       const list = Array.isArray(entriesRes.data) ? entriesRes.data : [];
       setActiveEntries(list.filter((e) => e?.status === "active"));
     } catch (err) {
@@ -134,7 +151,6 @@ export default function VehicleEntryPage() {
       responsable: "",
       observaciones: "",
     });
-    setEvidenceFile(null);
     setEvidencePreview("");
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -162,34 +178,55 @@ export default function VehicleEntryPage() {
 
     setSubmitting(true);
     try {
-      // 1) Buscar vehículo por placa (en tu backend actual)
-      const vehiclesRes = await api.get(`/security/vehicles?condominium_id=${condominiumId}`);
+      // 1) Buscar vehículo por placa (en tu backend actual o demo)
+      const vehiclesRes = DEMO_MODE
+        ? await demoFetchVehicles(condominiumId)
+        : await api.get(`/security/vehicles?condominium_id=${condominiumId}`);
       const vehicles = Array.isArray(vehiclesRes.data) ? vehiclesRes.data : [];
       let vehicle = vehicles.find((v) => String(v?.plate || "").toUpperCase() === plate);
 
       // 2) Crear vehículo si no existe
       if (!vehicle) {
-        const newVehicleRes = await api.post("/security/vehicles", {
-          condominium_id: condominiumId,
-          vehicle_type_id: Number(form.vehicleTypeId),
-          apartment_id: form.apartmentId ? Number(form.apartmentId) : null,
-          plate,
-          registered_by_id: form.responsable ? Number(form.responsable) : null,
-          owner_type: ownerTypeMap[form.tipoUsuario],
-          is_active: true,
-        });
+        const newVehicleRes = DEMO_MODE
+          ? await demoCreateVehicle({
+              condominium_id: condominiumId,
+              vehicle_type_id: Number(form.vehicleTypeId),
+              apartment_id: form.apartmentId ? Number(form.apartmentId) : null,
+              plate,
+              registered_by_id: form.responsable ? Number(form.responsable) : null,
+              owner_type: ownerTypeMap[form.tipoUsuario],
+              is_active: true,
+            })
+          : await api.post("/security/vehicles", {
+              condominium_id: condominiumId,
+              vehicle_type_id: Number(form.vehicleTypeId),
+              apartment_id: form.apartmentId ? Number(form.apartmentId) : null,
+              plate,
+              registered_by_id: form.responsable ? Number(form.responsable) : null,
+              owner_type: ownerTypeMap[form.tipoUsuario],
+              is_active: true,
+            });
 
         vehicle = newVehicleRes.data;
       }
 
       // 3) Registrar ingreso (entrada activa)
-      await api.post("/security/vehicle-entries", {
-        condominium_id: condominiumId,
-        vehicle_id: vehicle.id,
-        registered_by_id: form.responsable ? Number(form.responsable) : null,
-        observations: form.observaciones || "",
-        // evidencia demo NO se envía (solo UI)
-      });
+      if (DEMO_MODE) {
+        await demoCreateVehicleEntry({
+          condominium_id: condominiumId,
+          vehicle_id: vehicle.id,
+          registered_by_id: form.responsable ? Number(form.responsable) : null,
+          observations: form.observaciones || "",
+        });
+      } else {
+        await api.post("/security/vehicle-entries", {
+          condominium_id: condominiumId,
+          vehicle_id: vehicle.id,
+          registered_by_id: form.responsable ? Number(form.responsable) : null,
+          observations: form.observaciones || "",
+          // evidencia demo NO se envía (solo UI)
+        });
+      }
 
       resetForm();
       await loadActiveEntries();
@@ -210,7 +247,11 @@ export default function VehicleEntryPage() {
     if (!ok) return;
 
     try {
-      await api.put(`/security/vehicle-entries/checkout/${entry.id}`);
+      if (DEMO_MODE) {
+        await demoCheckoutVehicleEntry(entry.id);
+      } else {
+        await api.put(`/security/vehicle-entries/checkout/${entry.id}`);
+      }
       await loadActiveEntries();
     } catch (err) {
       console.error(err.response?.data || err.message);
@@ -229,12 +270,10 @@ export default function VehicleEntryPage() {
     if (!file) return;
 
     const url = URL.createObjectURL(file);
-    setEvidenceFile(file);
     setEvidencePreview(url);
   }
 
   function removeEvidence() {
-    setEvidenceFile(null);
     setEvidencePreview("");
     if (fileRef.current) fileRef.current.value = "";
   }

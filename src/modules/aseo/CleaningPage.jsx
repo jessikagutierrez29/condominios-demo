@@ -1,15 +1,14 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   createCleaningRecord,
   getCleaningAreas,
   getCleaningOperators,
 } from "./service/cleaning.service";
 
-const inputBase =
-  "w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200";
+const inputBase = "app-input";
 
 const Label = ({ children }) => (
-  <label className="text-sm text-gray-700 font-medium">{children}</label>
+  <label className="text-sm text-slate-700 font-medium">{children}</label>
 );
 
 const SectionTitle = ({ icon, title, rightChip }) => (
@@ -18,7 +17,7 @@ const SectionTitle = ({ icon, title, rightChip }) => (
       <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700">
         {icon}
       </div>
-      <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
     </div>
 
     {rightChip ? (
@@ -42,8 +41,6 @@ const nowHHMM = () => {
 export default function CleaningPage() {
   const [areas, setAreas] = useState([]);
   const [operators, setOperators] = useState([]);
-  const fileRef = useRef(null);
-
   const [form, setForm] = useState({
     areaId: "",
     operatorId: "",
@@ -55,10 +52,6 @@ export default function CleaningPage() {
 
   const setField = (name, value) =>
     setForm((prev) => ({ ...prev, [name]: value }));
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
 
   const loadInitialData = async () => {
     try {
@@ -72,6 +65,12 @@ export default function CleaningPage() {
     }
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   const handleCancel = () => {
     setForm({
       areaId: "",
@@ -84,38 +83,37 @@ export default function CleaningPage() {
   };
 
   const handleSave = async () => {
-  if (!form.areaId || !form.operatorId) return;
+    if (!form.areaId || !form.operatorId) return;
 
-  try {
-    await createCleaningRecord({
-      condominium_id: 1,
-      cleaning_area_id: form.areaId,
-      operative_id: form.operatorId,
-      cleaning_date: form.date,
-      observations: form.observations,
-    });
+    try {
+      await createCleaningRecord({
+        condominium_id: 1,
+        cleaning_area_id: form.areaId,
+        operative_id: form.operatorId,
+        cleaning_date: form.date,
+        observations: form.observations,
+      });
 
-    handleCancel();
-    alert("Registro guardado correctamente");
-  } catch (error) {
-    console.error(error);
-    alert("Error guardando registro");
-  }
-};
-
+      handleCancel();
+      alert("Registro guardado correctamente");
+    } catch (error) {
+      console.error(error);
+      alert("Error guardando registro");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="w-full">
       <div className="px-4 pt-4 pb-3 flex items-center gap-3">
         <button
           type="button"
-          className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center"
+          className="app-button-secondary px-4 py-2 text-sm"
           onClick={() => window.history.back()}
         >
-          ←
+          ← Volver
         </button>
 
-        <h1 className="text-xl font-extrabold text-gray-900">
+        <h1 className="text-xl font-extrabold text-slate-900">
           Seguimiento de Aseo y Limpieza
         </h1>
       </div>
@@ -158,7 +156,7 @@ export default function CleaningPage() {
         </div>
 
         <div className="space-y-4">
-          <SectionTitle icon="📅" title="Registro" />
+          <SectionTitle icon="📝" title="Registro" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -185,7 +183,7 @@ export default function CleaningPage() {
           <div className="space-y-2">
             <Label>Observaciones</Label>
             <textarea
-              className={`${inputBase} min-h-[120px]`}
+              className={`${inputBase} min-h-[120px] py-3`}
               value={form.observations}
               onChange={(e) => setField("observations", e.target.value)}
             />
@@ -196,7 +194,7 @@ export default function CleaningPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="w-full bg-white border border-gray-200 rounded-2xl py-4 font-extrabold text-gray-800 hover:bg-gray-50"
+            className="app-button-secondary w-full py-4 font-extrabold"
           >
             Cancelar
           </button>
@@ -204,7 +202,7 @@ export default function CleaningPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="w-full bg-blue-600 text-white rounded-2xl py-4 font-extrabold shadow-lg hover:bg-blue-700"
+            className="app-button-primary w-full py-4 font-extrabold"
           >
             Guardar Seguimiento
           </button>

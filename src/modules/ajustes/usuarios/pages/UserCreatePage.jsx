@@ -78,7 +78,7 @@ const handleSave = async () => {
     role;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="w-full">
       <div className="w-full max-w-4xl mx-auto p-6">
         <PageHeader title="Registrar Usuario" showBack />
 
@@ -207,11 +207,7 @@ const handleSave = async () => {
             type="button"
             disabled={!canSubmit}
             onClick={handleSave}
-            className={`w-full sm:w-[520px] rounded-2xl py-4 text-lg font-semibold shadow-xl transition ${
-              canSubmit
-                ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
-                : "bg-slate-200 text-slate-500 cursor-not-allowed"
-            }`}
+            className="app-button-primary w-full sm:w-[520px] py-4 text-lg font-semibold"
           >
             👤 Crear Usuario
           </button>
@@ -238,7 +234,7 @@ function SectionHeader({ number, title }) {
 
 function CardBlock({ children }) {
   return (
-    <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="mt-4 app-card p-5">
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -252,10 +248,8 @@ function InputField({ label, value, onChange, error, type = "text" }) {
       </p>
       <input
         type={type}
-        className={`mt-2 w-full h-14 rounded-2xl bg-white px-4 outline-none focus:ring-2 ${
-          error
-            ? "border border-red-400 focus:ring-red-200"
-            : "border border-slate-200 focus:ring-blue-200"
+        className={`mt-2 app-input h-14 ${
+          error ? "border border-red-400 focus:ring-red-200" : "border border-slate-200 focus:ring-blue-200"
         }`}
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import SearchField from "../../components/SearchField";
@@ -37,27 +37,6 @@ export default function ApartmentsPage() {
 
   // Toast de creación
   const created = params.get("created") === "1";
-  const [showToast, setShowToast] = useState(created);
-
-  useEffect(() => {
-    if (!created) return;
-
-    setShowToast(true);
-
-    const t1 = setTimeout(() => setShowToast(false), 2400);
-    const t2 = setTimeout(() => {
-      setParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("created");
-        return next;
-      }, { replace: true });
-    }, 2600);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [created, setParams]);
 
   // 🔹 Torres dinámicas
   const towers = useMemo(() => {
@@ -96,7 +75,7 @@ export default function ApartmentsPage() {
   }, [q, tower, floor, status, apartments]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="w-full">
       <div className="w-full max-w-4xl mx-auto">
 
         <PageHeader
@@ -114,10 +93,23 @@ export default function ApartmentsPage() {
           }
         />
 
-        {showToast && (
+        {created && (
           <div className="px-5 mt-2">
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 text-emerald-700 font-semibold">
-              ✅ Apartamento registrado correctamente
+            <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 text-emerald-700 font-semibold flex items-center justify-between gap-3">
+              <span>✅ Apartamento registrado correctamente</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete("created");
+                    return next;
+                  }, { replace: true });
+                }}
+                className="text-xs font-bold text-emerald-800"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         )}
@@ -216,7 +208,7 @@ export default function ApartmentsPage() {
           })}
 
           {!loading && filtered.length === 0 && (
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 text-center text-slate-500">
+            <div className="app-card p-6 text-center text-slate-500">
               No se encontraron apartamentos con esos filtros.
             </div>
           )}

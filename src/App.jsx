@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import LoginPage from "./auth/LoginPage";
 
 // Módulos principales
 import DashboardPage from "./modules/dashboard/DashboardPage";
@@ -38,43 +40,47 @@ import CleaningRecordPage from "./modules/ajustes/aseo/page/CleaningRecordPage";
 export default function App() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
-        {/* Home */}
-        <Route path="/" element={<DashboardPage />} />
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* ✅ Control ingreso */}
-        <Route path="/control-ingreso" element={<ControlIngresoPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          {/* Home */}
+          <Route path="/" element={<DashboardPage />} />
 
-        {/* Módulos */}
-        <Route path="/visitantes" element={<VisitorsPage />} />
+          {/* ✅ Control ingreso */}
+          <Route path="/control-ingreso" element={<ControlIngresoPage />} />
 
-        <Route path="/vehiculos" element={<VehiclesPage />} />
-        <Route path="/vehiculos/ingreso" element={<VehicleEntryPage />} />
-        <Route path="/vehiculos/novedad" element={<VehicleIncidentPage />} />
+          {/* Módulos */}
+          <Route path="/visitantes" element={<VisitorsPage />} />
 
-        <Route path="/correspondencia" element={<CorrespondenceRegisterPage />} />
-        <Route path="/emergencias" element={<EmergenciesPage />} />
-        <Route path="/aseo" element={<CleaningPage />} />
-        <Route path="/aseo/records" element={<CleaningRecordPage />} />
-        <Route path="/inventario" element={<InventoryMaintenancePage />} />
+          <Route path="/vehiculos" element={<VehiclesPage />} />
+          <Route path="/vehiculos/ingreso" element={<VehicleEntryPage />} />
+          <Route path="/vehiculos/novedad" element={<VehicleIncidentPage />} />
 
-        {/* Ajustes */}
-        <Route path="/ajustes" element={<SettingsPage />} />
-        <Route path="/ajustes/aseo" element={<CleaningSettingsPage />} />
+          <Route path="/correspondencia" element={<CorrespondenceRegisterPage />} />
+          <Route path="/emergencias" element={<EmergenciesPage />} />
+          <Route path="/aseo" element={<CleaningPage />} />
+          <Route path="/aseo/records" element={<CleaningRecordPage />} />
+          <Route path="/inventario" element={<InventoryMaintenancePage />} />
 
-        {/* Ajustes → Operativo */}
-        <Route path="/ajustes/unidades" element={<UnitTypesPage />} />
-        <Route path="/ajustes/apartamentos" element={<ApartmentsPage />} />
-        <Route path="/ajustes/apartamentos/crear" element={<ApartmentCreatePage />} />
-        <Route path="/ajustes/apartamentos/:id" element={<ApartmentDetailPage />} />
-        <Route path="/ajustes/usuarios" element={<UserPage />} />
-        <Route path="/ajustes/usuarios/:id" element={<UserDetailPage />} />
-        <Route path="/ajustes/usuarios/crear" element={<UserCreatePage />} />
-        <Route path="/ajustes/tipos-vehiculos" element={<VehicleTypePage />} />
-        <Route path="/ajustes/tipos-vehiculos/crear" element={<VehicleTypeCreatePage />} />
+          {/* Ajustes */}
+          <Route path="/ajustes" element={<SettingsPage />} />
+          <Route path="/ajustes/aseo" element={<CleaningSettingsPage />} />
 
-        {/* fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Ajustes → Operativo */}
+          <Route path="/ajustes/unidades" element={<UnitTypesPage />} />
+          <Route path="/ajustes/apartamentos" element={<ApartmentsPage />} />
+          <Route path="/ajustes/apartamentos/crear" element={<ApartmentCreatePage />} />
+          <Route path="/ajustes/apartamentos/:id" element={<ApartmentDetailPage />} />
+          <Route path="/ajustes/usuarios" element={<UserPage />} />
+          <Route path="/ajustes/usuarios/:id" element={<UserDetailPage />} />
+          <Route path="/ajustes/usuarios/crear" element={<UserCreatePage />} />
+          <Route path="/ajustes/tipos-vehiculos" element={<VehicleTypePage />} />
+          <Route path="/ajustes/tipos-vehiculos/crear" element={<VehicleTypeCreatePage />} />
+
+          {/* fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
       </Route>
     </Routes>
   );

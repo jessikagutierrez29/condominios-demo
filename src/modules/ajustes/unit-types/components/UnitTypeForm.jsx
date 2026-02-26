@@ -17,7 +17,7 @@ export default function UnitTypeForm({ onSubmit, loading }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-2xl shadow-sm space-y-4">
+    <div className="app-card p-4 space-y-4">
       <h2 className="font-semibold text-slate-800">
         Registrar tipo de unidad
       </h2>
@@ -27,7 +27,7 @@ export default function UnitTypeForm({ onSubmit, loading }) {
         placeholder="Ej. Apartamento"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full p-3 rounded-lg border border-slate-300"
+        className="app-input"
       />
 
       <label className="flex items-center gap-2 text-sm">
@@ -42,7 +42,7 @@ export default function UnitTypeForm({ onSubmit, loading }) {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full bg-blue-600 text-white p-3 rounded-xl font-semibold disabled:opacity-50"
+        className="app-button-primary w-full py-3 font-semibold"
       >
         {loading ? "Guardando..." : "Crear tipo"}
       </button>

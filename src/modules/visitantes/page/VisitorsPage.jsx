@@ -1,17 +1,28 @@
+import { useNavigate } from "react-router-dom";
 import VisitorForm from "../components/VisitorForm";
 import VisitorsList from "../components/VisitorList";
 import { useVisitors } from "../hooks/visitors";
 import { Users, UserPlus, Activity } from "lucide-react";
 
 export default function VisitorsPage() {
+  const navigate = useNavigate();
   const condominiumId = 1;
 
   const { apartments, visits, loading, registerVisit, checkout } =
     useVisitors(condominiumId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="mx-auto w-full max-w-7xl px-8 py-10 space-y-10">
+    <div className="w-full">
+      <div className="mx-auto w-full max-w-6xl px-6 py-8 space-y-8">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="app-button-secondary px-4 py-2 text-sm"
+          >
+            ← Volver
+          </button>
+        </div>
 
         {/* HEADER */}
         <div>
@@ -24,21 +35,18 @@ export default function VisitorsPage() {
             </p>
           </div>
 
-          <h1 className="mt-3 text-3xl font-bold text-slate-900">
-            Registro de Visitantes
-          </h1>
+          <h1 className="mt-3 app-title">Registro de Visitantes</h1>
 
-          <p className="mt-2 text-sm text-slate-500 max-w-xl">
+          <p className="mt-2 app-subtitle max-w-xl">
             Controla ingresos en tiempo real, registra evidencia fotográfica y
             administra salidas de manera segura.
           </p>
         </div>
 
         {/* LAYOUT PRINCIPAL */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* FORM */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div className="app-card p-8">
             <div className="flex items-center gap-3 mb-6">
               <UserPlus size={18} className="text-emerald-600" />
               <h2 className="text-lg font-semibold text-slate-800">
@@ -54,7 +62,7 @@ export default function VisitorsPage() {
           </div>
 
           {/* LISTA */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div className="app-card p-8">
             <div className="flex items-center gap-3 mb-6">
               <Activity size={18} className="text-indigo-600" />
               <h2 className="text-lg font-semibold text-slate-800">
@@ -62,12 +70,8 @@ export default function VisitorsPage() {
               </h2>
             </div>
 
-            <VisitorsList
-              visits={visits}
-              onCheckout={checkout}
-            />
+            <VisitorsList visits={visits} onCheckout={checkout} />
           </div>
-
         </div>
       </div>
     </div>

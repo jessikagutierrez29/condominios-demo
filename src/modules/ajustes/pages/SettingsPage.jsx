@@ -7,14 +7,15 @@ import {
   ChevronRight,
   User,
   Car,
-  Download
+  Download,
+  Sparkles,
 } from "lucide-react";
 
 function Card({ children, className = "" }) {
   return (
     <div
       className={[
-        "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm",
+        "app-card p-5",
         className,
       ].join(" ")}
     >
@@ -81,6 +82,15 @@ export default function SettingsPage() {
   return (
     <div className="w-full">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-6">
+        <div className="mb-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="app-button-secondary px-4 py-2 text-sm"
+          >
+            ← Volver
+          </button>
+        </div>
         {/* Header */}
         <PageTitle
           eyebrow="Configuración"
@@ -133,6 +143,13 @@ export default function SettingsPage() {
                   description="Gestiona los tipos de vehículos del sistema"
                   onClick={() => navigate("/ajustes/tipos-vehiculos")}
                 />
+
+                <ItemRow
+                  icon={<Sparkles size={18} />}
+                  title="Aseo"
+                  description="Parametriza áreas y checklist de limpieza"
+                  onClick={() => navigate("/ajustes/aseo")}
+                />
               </div>
             </Card>
           </div>
@@ -159,15 +176,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                <p className="text-xs font-extrabold text-slate-700">
-                  Recomendación
-                </p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">
-                  Mantén la parametrización por ID de condominio y evita editar
-                  estados manualmente.
-                </p>
-              </div>
             </Card>
 
             {/* ✅ NUEVO BOTÓN DESCARGAR MINUTA */}
@@ -180,7 +188,7 @@ export default function SettingsPage() {
                 href="https://organizaciongen1-my.sharepoint.com/:x:/r/personal/desarrollador_junior2_organizaciongen_com/_layouts/15/Doc.aspx?sourcedoc=%7B60FD466A-936F-46AD-9A9C-74E3D66E60FD%7D&file=Minuta_Digital_Modular_Simulada.xlsx&action=default&mobileredirect=true"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99] transition shadow-sm"
+                className="mt-4 app-button-primary w-full py-3 text-sm font-extrabold"
               >
                 <Download size={18} />
                 Descargar minuta

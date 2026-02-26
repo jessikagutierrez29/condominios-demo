@@ -80,17 +80,17 @@ export default function DashboardPage() {
     <div className="w-full">
       <div className="mx-auto w-full max-w-6xl px-6 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="flex flex-col gap-5 mb-8 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Panel Principal
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Resumen operativo del edificio
-            </p>
+            <h1 className="app-title">Panel principal</h1>
+            <p className="app-subtitle">Resumen operativo del edificio</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link to="/control-ingreso" className="app-button-primary">
+              Control de ingresos
+            </Link>
+
             <button
               type="button"
               className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-600 hover:bg-slate-50 transition flex items-center justify-center"
@@ -122,11 +122,8 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <Link
-              to="/control-ingreso"
-              className="w-full md:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md transition text-center"
-            >
-              Registrar ingreso
+            <Link to="/control-ingreso" className="app-button-secondary w-full md:w-auto">
+              Ir a control de ingresos
             </Link>
           </div>
         </Card>

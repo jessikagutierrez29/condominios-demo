@@ -9,19 +9,16 @@ import {
   removeChecklistTask,
 } from "../service/cleaningSettings.service";
 
-const inputBase =
-  "w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200";
+const inputBase = "app-input";
 
 const Label = ({ children }) => (
-  <label className="text-sm text-gray-700 font-medium">{children}</label>
+  <label className="text-sm text-slate-700 font-medium">{children}</label>
 );
 
 const Badge = ({ active }) => (
   <span
     className={`px-3 py-1 rounded-full text-xs font-black ${
-      active
-        ? "bg-green-100 text-green-700"
-        : "bg-gray-100 text-gray-600"
+      active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
     }`}
   >
     {active ? "ACTIVO" : "INACTIVO"}
@@ -45,14 +42,16 @@ function CleaningSettingsPage() {
   const [checklist, setChecklist] = useState([]);
   const [newTaskText, setNewTaskText] = useState("");
 
-  useEffect(() => {
-    loadAreas();
-  }, []);
-
   const loadAreas = async () => {
     const data = await getCleaningAreasSettings(1);
     setAreas(data);
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    loadAreas();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const onCreateArea = async () => {
     if (!newAreaName.trim()) return;
@@ -116,22 +115,22 @@ function CleaningSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <div className="bg-white border-b border-gray-100">
+    <div className="w-full">
+      <div className="bg-white border-b border-slate-200">
         <div className="px-4 pt-4 pb-3 flex items-start gap-3 max-w-3xl mx-auto">
           <button
             type="button"
-            className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center mt-0.5"
+            className="app-button-secondary px-4 py-2 text-sm"
             onClick={() => window.history.back()}
           >
-            ←
+            ← Volver
           </button>
 
           <div>
-            <h1 className="text-xl font-extrabold text-blue-700">
+            <h1 className="text-xl font-extrabold text-slate-900">
               Parametrización de Aseo
             </h1>
-            <div className="text-xs tracking-widest text-gray-500 font-bold">
+            <div className="text-xs tracking-widest text-slate-500 font-bold">
               AJUSTES DE CONDOMINIO
             </div>
           </div>
@@ -140,21 +139,21 @@ function CleaningSettingsPage() {
 
       <div className="px-4 pb-10 max-w-3xl mx-auto">
         <div className="pt-6">
-          <h2 className="text-3xl font-extrabold text-gray-900">
+          <h2 className="text-3xl font-extrabold text-slate-900">
             Gestión de Áreas
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className="text-slate-600 mt-2">
             Configure las zonas y protocolos de limpieza de su copropiedad.
           </p>
         </div>
 
         {/* CREAR AREA */}
-        <div className="mt-6 bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
+        <div className="mt-6 app-card p-5">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 font-black">
               +
             </div>
-            <div className="text-lg font-extrabold text-gray-900">
+            <div className="text-lg font-extrabold text-slate-900">
               Nueva Área
             </div>
           </div>
@@ -172,7 +171,7 @@ function CleaningSettingsPage() {
           <button
             type="button"
             onClick={onCreateArea}
-            className="mt-4 w-full bg-blue-600 text-white rounded-2xl py-4 font-extrabold shadow-lg hover:bg-blue-700"
+            className="mt-4 app-button-primary w-full py-4 font-extrabold"
           >
             Guardar Área
           </button>
@@ -184,14 +183,9 @@ function CleaningSettingsPage() {
             const isEditing = editingAreaId === a.id;
 
             return (
-              <div
-                key={a.id}
-                className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5"
-              >
+              <div key={a.id} className="app-card p-5">
                 <div className="flex items-center gap-4">
-                  <IconCircle>
-                    {a.name?.[0]?.toUpperCase() || "A"}
-                  </IconCircle>
+                  <IconCircle>{a.name?.[0]?.toUpperCase() || "A"}</IconCircle>
 
                   <div className="flex-1">
                     {isEditing ? (
@@ -200,20 +194,18 @@ function CleaningSettingsPage() {
                         <input
                           className={inputBase}
                           value={editingName}
-                          onChange={(e) =>
-                            setEditingName(e.target.value)
-                          }
+                          onChange={(e) => setEditingName(e.target.value)}
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={saveEdit}
-                            className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700"
+                            className="app-button-primary px-4 py-2 text-sm font-bold"
                           >
                             Guardar
                           </button>
                           <button
                             onClick={cancelEdit}
-                            className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"
+                            className="app-button-secondary px-4 py-2 text-sm font-bold"
                           >
                             Cancelar
                           </button>
@@ -222,7 +214,7 @@ function CleaningSettingsPage() {
                     ) : (
                       <>
                         <div className="flex items-center gap-3">
-                          <div className="text-lg font-extrabold text-gray-900">
+                          <div className="text-lg font-extrabold text-slate-900">
                             {a.name}
                           </div>
                           <Badge active={a.is_active} />
@@ -233,9 +225,7 @@ function CleaningSettingsPage() {
                             onClick={() => toggleActive(a.id)}
                             className="text-xs font-extrabold text-blue-700 hover:underline"
                           >
-                            {a.is_active
-                              ? "Desactivar"
-                              : "Activar"}
+                            {a.is_active ? "Desactivar" : "Activar"}
                           </button>
                         </div>
                       </>
@@ -245,9 +235,9 @@ function CleaningSettingsPage() {
                   {!isEditing && (
                     <button
                       onClick={() => startEdit(a)}
-                      className="w-10 h-10 rounded-2xl hover:bg-gray-100 flex items-center justify-center"
+                      className="w-10 h-10 rounded-2xl hover:bg-slate-100 flex items-center justify-center"
                     >
-                      ✎
+                      ✏️
                     </button>
                   )}
                 </div>
@@ -256,15 +246,15 @@ function CleaningSettingsPage() {
                   <>
                     <button
                       onClick={() => openChecklist(a.id)}
-                      className="mt-4 w-full rounded-2xl py-3 font-extrabold border border-blue-600 text-blue-700 hover:bg-blue-50"
+                      className="mt-4 app-button-secondary w-full py-3 font-extrabold text-blue-700 border-blue-600"
                     >
                       Configurar Checklist
                     </button>
 
                     {checklistAreaId === a.id && (
-                      <div className="mt-4 bg-[#F7F9FC] p-4 rounded-2xl border border-gray-200">
+                      <div className="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         {checklist.length === 0 && (
-                          <div className="text-sm text-gray-500 mb-3">
+                          <div className="text-sm text-slate-500 mb-3">
                             No hay tareas configuradas.
                           </div>
                         )}
@@ -276,9 +266,7 @@ function CleaningSettingsPage() {
                           >
                             <span>{item.item_name}</span>
                             <button
-                              onClick={() =>
-                                deleteTask(item.id)
-                              }
+                              onClick={() => deleteTask(item.id)}
                               className="text-red-500 font-bold"
                             >
                               Eliminar
@@ -290,14 +278,12 @@ function CleaningSettingsPage() {
                           <input
                             className={inputBase}
                             value={newTaskText}
-                            onChange={(e) =>
-                              setNewTaskText(e.target.value)
-                            }
+                            onChange={(e) => setNewTaskText(e.target.value)}
                             placeholder="Nueva tarea..."
                           />
                           <button
                             onClick={addTask}
-                            className="bg-blue-600 text-white px-4 rounded-2xl font-bold"
+                            className="app-button-primary px-4 font-bold"
                           >
                             +
                           </button>

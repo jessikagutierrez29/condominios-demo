@@ -1,7 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   createVehicleIncident,
-  getVehicleIncidents,
 } from "../service/vehicleIncidents.service";
 
 const inputBase =
@@ -61,8 +60,6 @@ const formatFull = (iso) => {
 
 const VehicleIncidentPage = () => {
   const fileRef = useRef(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
   const [form, setForm] = useState({
     tipoVehiculo: "",
     placa: "",
@@ -73,11 +70,6 @@ const VehicleIncidentPage = () => {
     photoList: [],
     createdAt: new Date().toISOString(),
   });
-
-  const incidents = useMemo(() => {
-    void refreshKey;
-    return getVehicleIncidents();
-  }, [refreshKey]);
 
   const setField = (name, value) =>
     setForm((p) => ({ ...p, [name]: value }));
@@ -130,7 +122,6 @@ const VehicleIncidentPage = () => {
       createdAt: new Date().toISOString(),
     });
 
-    setRefreshKey((k) => k + 1);
   };
 
   return (

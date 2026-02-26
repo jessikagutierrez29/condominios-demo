@@ -9,11 +9,8 @@ import {
   Sparkles,
   Boxes,
   Settings,
-  Building2,
   Menu,
 } from "lucide-react";
-
-console.log("✅ MainLayout ACTIVO");
 
 const navOperation = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -29,11 +26,10 @@ const navOperationSafe = navOperation.filter(
   (item) => item.to !== "/control-ingreso"
 );
 
-const navConfig = [
-  { to: "/ajustes", label: "Ajustes", icon: Settings },
-];
+const navConfig = [{ to: "/ajustes", label: "Ajustes", icon: Settings }];
 
-function SidebarLink({ to, label, icon: Icon, onClick }) {
+function SidebarLink({ to, label, icon, onClick }) {
+  const IconComponent = icon;
   return (
     <NavLink to={to} className="block" onClick={onClick}>
       {({ isActive }) => (
@@ -53,7 +49,7 @@ function SidebarLink({ to, label, icon: Icon, onClick }) {
             ].join(" ")}
           />
 
-          <Icon
+          <IconComponent
             size={18}
             className={
               isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
@@ -74,15 +70,13 @@ function SidebarContent({ onNavigate }) {
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
             <img
-              src="/image/isotipo1.png"
+              src="/image/genaccess-logo.png"
               alt="GenAccess"
               className="h-8 w-auto object-contain"
             />
           </div>
           <div className="leading-tight">
-            <h2 className="text-lg font-extrabold text-slate-900">
-              GenAccess
-            </h2>
+            <h2 className="text-lg font-extrabold text-slate-900">GenAccess</h2>
             <p className="text-xs font-bold tracking-widest text-slate-400">
               GESTIÓN INTEGRAL
             </p>
@@ -138,12 +132,10 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Desktop */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-80 lg:flex-col bg-white border-r border-slate-200">
         <SidebarContent />
       </aside>
 
-      {/* Drawer Mobile */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-[999]">
           <button
@@ -157,7 +149,6 @@ export default function MainLayout() {
         </div>
       )}
 
-      {/* Botón flotante mobile */}
       <button
         className="lg:hidden fixed top-4 right-4 z-[998] h-12 w-12 rounded-2xl bg-white border border-slate-200 shadow-md text-slate-800 flex items-center justify-center"
         onClick={() => setMobileOpen(true)}
@@ -166,7 +157,6 @@ export default function MainLayout() {
         <Menu size={20} />
       </button>
 
-      {/* Main */}
       <div className="lg:pl-80 flex flex-col min-h-screen bg-slate-50">
         <main className="flex-1 p-4 pt-20 pb-24 lg:p-6 lg:pt-6 lg:pb-8">
           <Outlet />

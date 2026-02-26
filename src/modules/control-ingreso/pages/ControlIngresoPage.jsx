@@ -1,5 +1,7 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MapPin, Camera } from "lucide-react";
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 const mockEmployees = [
   {
@@ -25,11 +27,7 @@ const mockEmployees = [
 ];
 
 const Card = ({ children, className = "" }) => (
-  <div
-    className={`bg-white border border-slate-200 rounded-2xl shadow-sm ${className}`}
-  >
-    {children}
-  </div>
+  <div className={`app-card ${className}`}>{children}</div>
 );
 
 const SectionTitle = ({ title, subtitle }) => (
@@ -95,12 +93,27 @@ function RowItem({ name, role, place, time }) {
 
 export default function ControlIngresoPage() {
   const [selectedId, setSelectedId] = useState(mockEmployees[0].id);
-  const [isPresent, setIsPresent] = useState(false);
+  const [activeList, setActiveList] = useState([
+    {
+      id: 99281,
+      fullName: "Juan Pérez",
+      role: "Mantenimiento",
+      place: "Torre A",
+      time: "07:58 AM",
+    },
+    {
+      id: 88412,
+      fullName: "María Santos",
+      role: "Recepción",
+      place: "Área Social",
+      time: "08:15 AM",
+    },
+  ]);
+  const [historyList, setHistoryList] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("turno"); // "turno" | "historial"
+  const [activeTab, setActiveTab] = useState("turno");
   const [segment, setSegment] = useState("todos");
 
-  // Evidencia (demo interactiva)
   const fileRef = useRef(null);
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [evidenceName, setEvidenceName] = useState("");
@@ -111,17 +124,17 @@ export default function ControlIngresoPage() {
   );
 
   const badge = employee?.type ?? "INTERNO";
+  const isPresent = activeList.some((p) => p.id === selectedId);
   const hasEvidence = Boolean(evidenceUrl);
 
-  // ✅ Al cambiar empleado: limpiar evidencia (para demo consistente)
-  useEffect(() => {
+  function resetEvidence() {
     setEvidenceUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return "";
     });
     setEvidenceName("");
     if (fileRef.current) fileRef.current.value = "";
-  }, [selectedId]);
+  }
 
   async function fakeSave() {
     setSaving(true);
@@ -131,16 +144,48 @@ export default function ControlIngresoPage() {
 
   async function handleIngreso() {
     if (saving) return;
-    if (!hasEvidence) return;
+    if (!hasEvidence && !DEMO_MODE) return;
     await fakeSave();
-    setIsPresent(true);
+    if (!employee) return;
+    setActiveList((prev) => {
+      if (prev.some((p) => p.id === employee.id)) return prev;
+      const time = new Date().toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return [
+        {
+          id: employee.id,
+          fullName: employee.fullName,
+          role: employee.role,
+          place: employee.area,
+          time,
+        },
+        ...prev,
+      ];
+    });
   }
 
   async function handleSalida() {
     if (saving) return;
-    if (!hasEvidence) return;
+    if (!hasEvidence && !DEMO_MODE) return;
     await fakeSave();
-    setIsPresent(false);
+    if (!employee) return;
+    const time = new Date().toLocaleTimeString("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setActiveList((prev) => prev.filter((p) => p.id !== employee.id));
+    setHistoryList((prev) => [
+      {
+        id: employee.id,
+        fullName: employee.fullName,
+        role: employee.role,
+        place: employee.area,
+        time,
+      },
+      ...prev,
+    ]);
   }
 
   function openPicker() {
@@ -174,27 +219,36 @@ export default function ControlIngresoPage() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  const ctaHint = !hasEvidence
+  const canRegister = DEMO_MODE ? true : hasEvidence;
+
+  const ctaHint = !canRegister
     ? "Primero toma o carga la evidencia fotográfica."
     : isPresent
-      ? "Evidencia lista. Puedes registrar la salida."
-      : "Evidencia lista. Puedes registrar el ingreso.";
+      ? "Listo para registrar la salida."
+      : "Listo para registrar el ingreso.";
 
   return (
     <div className="w-full">
       <div className="mx-auto w-full max-w-6xl px-6 py-8">
-        {/* Header */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="app-button-secondary px-4 py-2 text-sm"
+          >
+            ← Volver
+          </button>
+        </div>
+
         <div className="mb-6">
           <SectionTitle subtitle="Gestión de personal" title="Control de Ingreso" />
           <p className="mt-2 text-sm text-slate-500">{ctaHint}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* IZQUIERDA */}
           <div className="space-y-6">
             <Segmented value={segment} onChange={setSegment} />
 
-            {/* Selector */}
             <div>
               <p className="mb-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Seleccionar empleado
@@ -205,7 +259,10 @@ export default function ControlIngresoPage() {
                   <select
                     className="w-full appearance-none bg-transparent text-sm font-bold text-slate-900 outline-none"
                     value={selectedId}
-                    onChange={(e) => setSelectedId(Number(e.target.value))}
+                    onChange={(e) => {
+                      resetEvidence();
+                      setSelectedId(Number(e.target.value));
+                    }}
                   >
                     {mockEmployees.map((e) => (
                       <option key={e.id} value={e.id}>
@@ -221,7 +278,6 @@ export default function ControlIngresoPage() {
               </Card>
             </div>
 
-            {/* Card empleado */}
             <Card className="p-4 rounded-3xl">
               <div className="flex items-start gap-4">
                 <div className="h-16 w-16 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200">
@@ -263,7 +319,6 @@ export default function ControlIngresoPage() {
 
               <div className="my-4 h-px bg-slate-100" />
 
-              {/* Observaciones */}
               <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Observaciones
               </p>
@@ -271,7 +326,6 @@ export default function ControlIngresoPage() {
                 “{employee?.observations}”
               </p>
 
-              {/* ✅ AQUÍ VA “TOMAR FOTO” (debajo de Observaciones) */}
               <div className="mt-4">
                 <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
                   Evidencia
@@ -293,9 +347,7 @@ export default function ControlIngresoPage() {
                       className="w-full h-[220px] object-cover"
                     />
                     <div className="p-3 flex items-center justify-between gap-3">
-                      <p className="text-xs text-slate-600 truncate">
-                        {evidenceName}
-                      </p>
+                      <p className="text-xs text-slate-600 truncate">{evidenceName}</p>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -339,7 +391,6 @@ export default function ControlIngresoPage() {
                 )}
               </div>
 
-              {/* Estado visual */}
               <div className="mt-5 flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 border border-slate-200">
                 <span className="text-xs font-bold text-slate-500 uppercase">
                   Estado
@@ -358,9 +409,7 @@ export default function ControlIngresoPage() {
             </Card>
           </div>
 
-          {/* DERECHA */}
           <div className="space-y-6">
-            {/* ✅ AQUÍ VAN LOS BOTONES (en lugar de la foto) */}
             <Card className="p-4 rounded-3xl">
               <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Registro
@@ -369,7 +418,7 @@ export default function ControlIngresoPage() {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <button
                   onClick={handleIngreso}
-                  disabled={saving || !hasEvidence}
+                  disabled={saving || !canRegister}
                   className={[
                     "rounded-2xl border px-4 py-3 text-sm font-extrabold transition",
                     "disabled:opacity-60 disabled:cursor-not-allowed",
@@ -383,7 +432,7 @@ export default function ControlIngresoPage() {
 
                 <button
                   onClick={handleSalida}
-                  disabled={saving || !hasEvidence}
+                  disabled={saving || !canRegister}
                   className={[
                     "rounded-2xl border px-4 py-3 text-sm font-extrabold transition",
                     "disabled:opacity-60 disabled:cursor-not-allowed",
@@ -396,11 +445,9 @@ export default function ControlIngresoPage() {
                 </button>
               </div>
 
-              {!hasEvidence && (
+              {!canRegister && (
                 <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                  <p className="text-xs font-bold text-amber-900">
-                    Falta evidencia
-                  </p>
+                  <p className="text-xs font-bold text-amber-900">Falta evidencia</p>
                   <p className="mt-1 text-xs font-semibold text-amber-800">
                     Debes tomar o cargar la foto para habilitar el registro.
                   </p>
@@ -408,7 +455,6 @@ export default function ControlIngresoPage() {
               )}
             </Card>
 
-            {/* Tabs */}
             <Card className="p-3 rounded-3xl">
               <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-2">
                 <button
@@ -422,7 +468,7 @@ export default function ControlIngresoPage() {
                 >
                   Personal en turno{" "}
                   <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] text-slate-700">
-                    12
+                    {activeList.length}
                   </span>
                 </button>
 
@@ -442,22 +488,39 @@ export default function ControlIngresoPage() {
               <div className="mt-3">
                 {activeTab === "turno" ? (
                   <div className="space-y-3 p-2">
-                    <RowItem
-                      name="Juan Pérez"
-                      role="Mantenimiento"
-                      place="Torre A"
-                      time="07:58 AM"
-                    />
-                    <RowItem
-                      name="María Santos"
-                      role="Recepción"
-                      place="Área Social"
-                      time="08:15 AM"
-                    />
+                    {activeList.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                        No hay personal en turno.
+                      </div>
+                    ) : (
+                      activeList.map((p) => (
+                        <RowItem
+                          key={p.id}
+                          name={p.fullName}
+                          role={p.role}
+                          place={p.place}
+                          time={p.time}
+                        />
+                      ))
+                    )}
                   </div>
                 ) : (
-                  <div className="p-4 text-sm font-semibold text-slate-600">
-                    Aquí va el historial de salidas (pendiente backend).
+                  <div className="p-2 space-y-3">
+                    {historyList.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                        No hay salidas registradas.
+                      </div>
+                    ) : (
+                      historyList.map((p, idx) => (
+                        <RowItem
+                          key={`${p.id}-${idx}`}
+                          name={p.fullName}
+                          role={p.role}
+                          place={p.place}
+                          time={p.time}
+                        />
+                      ))
+                    )}
                   </div>
                 )}
               </div>

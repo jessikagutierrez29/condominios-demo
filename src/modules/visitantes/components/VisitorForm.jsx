@@ -2,9 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { Camera, ShieldCheck } from "lucide-react";
 
 const Card = ({ children, className = "" }) => (
-  <div className={`rounded-3xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
-    {children}
-  </div>
+  <div className={`app-card p-5 ${className}`}>{children}</div>
 );
 
 const Label = ({ children }) => (
@@ -19,8 +17,7 @@ const ErrorText = ({ children }) => (
   <p className="mt-2 text-sm text-red-600">{children}</p>
 );
 
-const inputBase =
-  "w-full h-14 rounded-2xl bg-white px-4 text-slate-900 outline-none focus:ring-2 border";
+const inputBase = "app-input h-14";
 
 export default function VisitorForm({ apartments = [], onSubmit, loading }) {
   const fileRef = useRef(null);
@@ -33,7 +30,6 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
 
   const [antecedentesConsultados, setAntecedentesConsultados] = useState(false);
 
-  // Demo evidencia (preview)
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [evidenceName, setEvidenceName] = useState("");
 
@@ -59,11 +55,6 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
       next.antecedentes = "Debes confirmar que consultaste antecedentes.";
     setErrors(next);
     return Object.keys(next).length === 0;
-  };
-
-  const handleConsultAntecedentes = () => {
-    // Demo: aquí luego conectas a backend real
-    setAntecedentesConsultados(true);
   };
 
   const openPicker = () => fileRef.current?.click();
@@ -95,6 +86,17 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const resetForm = () => {
+    setFullName("");
+    setDocument("");
+    setPhone("");
+    setApartmentId("");
+    setObjects("");
+    setAntecedentesConsultados(false);
+    clearEvidence();
+    setErrors({});
+  };
+
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -108,6 +110,8 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
       background_check: antecedentesConsultados,
       photo: fileRef.current?.files?.[0] || null,
     });
+
+    resetForm();
   };
 
   return (
@@ -194,8 +198,11 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
           <div>
             <Label>Nombre completo</Label>
             <input
-              className={`${inputBase} ${errors.fullName ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-blue-200"
-                }`}
+              className={`${inputBase} ${
+                errors.fullName
+                  ? "border-red-400 focus:ring-red-200"
+                  : "border-slate-200 focus:ring-blue-200"
+              }`}
               placeholder="Ej. Ana María Pérez"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -207,8 +214,11 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
             <div>
               <Label>Documento</Label>
               <input
-                className={`${inputBase} ${errors.document ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-blue-200"
-                  }`}
+                className={`${inputBase} ${
+                  errors.document
+                    ? "border-red-400 focus:ring-red-200"
+                    : "border-slate-200 focus:ring-blue-200"
+                }`}
                 placeholder="Ej. 1094..."
                 value={document}
                 onChange={(e) => setDocument(e.target.value)}
@@ -219,8 +229,11 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
             <div>
               <Label>Celular</Label>
               <input
-                className={`${inputBase} ${errors.phone ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-blue-200"
-                  }`}
+                className={`${inputBase} ${
+                  errors.phone
+                    ? "border-red-400 focus:ring-red-200"
+                    : "border-slate-200 focus:ring-blue-200"
+                }`}
                 placeholder="Ej. 300..."
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -232,8 +245,11 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
           <div>
             <Label>Apartamento destino</Label>
             <select
-              className={`${inputBase} ${errors.apartmentId ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-blue-200"
-                }`}
+              className={`${inputBase} ${
+                errors.apartmentId
+                  ? "border-red-400 focus:ring-red-200"
+                  : "border-slate-200 focus:ring-blue-200"
+              }`}
               value={apartmentId}
               onChange={(e) => setApartmentId(e.target.value)}
             >
@@ -250,8 +266,7 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
           <div>
             <Label>Objetos que trae</Label>
             <textarea
-              className={`w-full min-h-[110px] rounded-2xl bg-white px-4 py-3 text-slate-900 outline-none focus:ring-2 border ${"border-slate-200 focus:ring-blue-200"
-                }`}
+              className={`app-input min-h-[110px] py-3 border border-slate-200 focus:ring-blue-200`}
               placeholder="Ej. maleta, portátil, caja..."
               value={objects}
               onChange={(e) => setObjects(e.target.value)}
@@ -260,20 +275,21 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
         </div>
 
         {/* Antecedentes */}
-        <div className="mt-6">
-          <button
-            type="button"
-            onClick={handleConsultAntecedentes}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 transition"
-            disabled={loading}
+        <div className="mt-6 space-y-3">
+          <a
+            href="https://antecedentes.policia.gov.co:7005/WebJudicial/"
+            target="_blank"
+            rel="noreferrer"
+            className="app-button-secondary w-full py-3 text-sm font-extrabold text-center"
+            onClick={() => setAntecedentesConsultados(true)}
           >
-            <div className="flex items-center justify-center gap-2">
+            <span className="inline-flex items-center justify-center gap-2">
               <ShieldCheck size={18} className="text-emerald-600" />
-              Consultar antecedentes
-            </div>
-          </button>
+              Consulta de antecedentes
+            </span>
+          </a>
 
-          <div className="mt-4 flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <input
               id="antecedentes"
               type="checkbox"
@@ -298,10 +314,7 @@ export default function VisitorForm({ apartments = [], onSubmit, loading }) {
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`w-full rounded-2xl py-4 text-sm font-extrabold shadow-sm transition ${canSubmit
-              ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
-              : "bg-slate-200 text-slate-500 cursor-not-allowed"
-              }`}
+            className="app-button-primary w-full py-4 text-sm font-extrabold"
           >
             {loading ? "Guardando..." : "Registrar ingreso"}
           </button>

@@ -14,7 +14,7 @@ export default function UserDetailPage() {
       try {
         const res = await getUser(id);
         setUser(res.data);
-      } catch (e) {
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);
@@ -39,7 +39,7 @@ export default function UserDetailPage() {
           onBack={() => navigate("/ajustes/usuarios")}
         />
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="app-card p-5">
           <p className="text-sm text-slate-700">
             No se encontró el usuario con ID <b>{id}</b>.
           </p>
@@ -58,7 +58,8 @@ export default function UserDetailPage() {
   const roleName = user.roles?.[0]?.name ?? "Sin rol";
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="w-full">
+      <div className="p-6 space-y-5 max-w-5xl mx-auto">
       {/* HEADER */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
@@ -112,7 +113,7 @@ export default function UserDetailPage() {
       </div>
 
       {/* RESUMEN */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-5">
+      <div className="app-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">
             Resumen
@@ -130,7 +131,7 @@ export default function UserDetailPage() {
       </div>
 
       {/* PERFIL ASOCIADO */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-5">
+      <div className="app-card p-5">
         <h2 className="text-lg font-semibold text-slate-900">
           Perfil Asociado
         </h2>
@@ -174,6 +175,7 @@ export default function UserDetailPage() {
         >
           Desactivar usuario
         </button>
+      </div>
       </div>
     </div>
   );

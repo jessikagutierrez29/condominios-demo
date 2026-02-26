@@ -11,7 +11,7 @@ export default function SelectField({ label, value, onChange, options = [] }) {
         <select
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="app-input h-14 text-lg"
         >
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>

@@ -1,13 +1,23 @@
 import api from "../../../../service/api";
+import {
+  demoFetchVehicleTypes,
+  demoCreateVehicleType,
+  demoUpdateVehicleType,
+  demoDeactivateVehicleType,
+} from "../../../../service/demoStore";
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 export const fetchVehicleTypes = (condominiumId) =>
-  api.get(`/security/vehicle-types?condominium_id=${condominiumId}`);
+  DEMO_MODE
+    ? demoFetchVehicleTypes(condominiumId)
+    : api.get(`/security/vehicle-types?condominium_id=${condominiumId}`);
 
 export const createVehicleType = (data) =>
-  api.post("/security/vehicle-types", data);
+  DEMO_MODE ? demoCreateVehicleType(data) : api.post("/security/vehicle-types", data);
 
 export const updateVehicleType = (id, data) =>
-  api.put(`/security/vehicle-types/${id}`, data);
+  DEMO_MODE ? demoUpdateVehicleType(id, data) : api.put(`/security/vehicle-types/${id}`, data);
 
 export const deactivateVehicleType = (id) =>
-  api.delete(`/security/vehicle-types/${id}`);
+  DEMO_MODE ? demoDeactivateVehicleType(id) : api.delete(`/security/vehicle-types/${id}`);

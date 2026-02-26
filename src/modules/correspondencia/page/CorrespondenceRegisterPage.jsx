@@ -1,14 +1,16 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  demoCreateCorrespondence,
+  demoDeliverCorrespondence,
+  demoFetchCorrespondences,
+  demoFetchApartments,
+} from "../../../service/demoStore";
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 const Card = ({ children, className = "" }) => (
-  <div
-    className={[
-      "rounded-3xl border border-slate-200 bg-white p-6 shadow-sm",
-      className,
-    ].join(" ")}
-  >
-    {children}
-  </div>
+  <div className={["app-card p-6", className].join(" ")}>{children}</div>
 );
 
 const Kicker = ({ children }) => (
@@ -47,22 +49,15 @@ const Hint = ({ children }) => (
   <p className="text-xs font-semibold text-slate-400">{children}</p>
 );
 
-const inputBase =
-  "mt-2 w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200";
+const inputBase = "mt-2 app-input";
 
-const textareaBase =
-  "mt-2 w-full min-h-[110px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200";
+const textareaBase = "mt-2 app-input min-h-[110px] py-3";
 
 const PrimaryButton = ({ children, disabled, ...props }) => (
   <button
     {...props}
     disabled={disabled}
-    className={[
-      "w-full rounded-2xl py-4 text-sm font-extrabold shadow-xl transition",
-      disabled
-        ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-        : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]",
-    ].join(" ")}
+    className="app-button-primary w-full py-4 text-sm font-extrabold shadow-xl"
   >
     {children}
   </button>
@@ -78,10 +73,10 @@ const GhostButton = ({ children, ...props }) => (
   </button>
 );
 
-function EmptyState() {
+function EmptyState({ text }) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-      <p className="text-sm font-extrabold text-slate-900">Sin registros recientes</p>
+      <p className="text-sm font-extrabold text-slate-900">{text}</p>
       <p className="mt-1 text-xs font-semibold text-slate-500">
         Cuando registres entregas, aparecerán aquí para consulta rápida.
       </p>
@@ -89,44 +84,59 @@ function EmptyState() {
   );
 }
 
-function Row({ item }) {
+function Row({ item, onDeliver }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4">
       <div className="min-w-0">
         <p className="truncate text-sm font-extrabold text-slate-900">
-          {item?.courier || "Mensajería"} • {item?.unit || "Unidad"}
+          {item?.courier || "Mensajería"} • {item?.unit_label || "Unidad"}
         </p>
         <p className="truncate text-[11px] font-semibold text-slate-500">
           {item?.type || "Documento"} • Recibe: {item?.receiver || "—"}
         </p>
+        <p className="truncate text-[11px] font-semibold text-slate-400">
+          {item?.created_at
+            ? new Date(item.created_at).toLocaleString("es-CO")
+            : "—"}
+        </p>
       </div>
-      <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
-        {item?.date || "—"}
-      </span>
+
+      {item.status === "pending" ? (
+        <button
+          type="button"
+          onClick={() => onDeliver?.(item.id)}
+          className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition"
+        >
+          Marcar entregado
+        </button>
+      ) : (
+        <span className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-extrabold text-slate-700 border border-slate-200">
+          Entregado
+        </span>
+      )}
     </div>
   );
 }
 
 export default function CorrespondencePage() {
-  // Mock (cámbialo por tu hook real)
-  const apartments = useMemo(() => [{ id: 1, label: "Apto 402" }, { id: 2, label: "Apto 101" }], []);
-  const couriers = useMemo(() => ["Servientrega", "Interrapidísimo", "Coordinadora"], []);
-  const recent = useMemo(() => [], []);
+  const navigate = useNavigate();
+  const condominiumId = 1;
+
+  const [apartments, setApartments] = useState([]);
+  const couriers = ["Servientrega", "Interrapidísimo", "Coordinadora"];
 
   const [form, setForm] = useState({
     courier: "Servientrega",
     unitId: "",
-    packageType: "documento", // documento | paquete
+    packageType: "documento",
     receiverName: "",
     notes: "",
   });
 
-  const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
+  const [list, setList] = useState([]);
+  const [tab, setTab] = useState("pending");
   const fileRef = useRef(null);
-
-  // Firma: deja el contenedor listo para tu canvas/componente actual
-  const signatureBoxRef = useRef(null);
 
   const canSubmit =
     form.courier &&
@@ -134,8 +144,20 @@ export default function CorrespondencePage() {
     form.packageType &&
     form.receiverName.trim().length > 0;
 
+  useEffect(() => {
+    if (!DEMO_MODE) return;
+    demoFetchCorrespondences(condominiumId).then((res) => setList(res.data || []));
+    demoFetchApartments(condominiumId).then((res) => {
+      const mapped =
+        res.data?.map((a) => ({
+          id: a.id,
+          label: `Apto ${a.number}`,
+        })) || [];
+      setApartments(mapped);
+    });
+  }, [condominiumId]);
+
   const onPickPhoto = (file) => {
-    setPhotoFile(file || null);
     if (!file) {
       setPhotoPreview("");
       return;
@@ -145,7 +167,6 @@ export default function CorrespondencePage() {
   };
 
   const clearPhoto = () => {
-    setPhotoFile(null);
     setPhotoPreview("");
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -159,15 +180,58 @@ export default function CorrespondencePage() {
     e.preventDefault();
     if (!canSubmit) return;
 
-    // 👇 aquí conectas tu API real (solo UI por ahora)
-    alert("Entrega registrada (demo UI).");
+    const unitLabel = apartments.find((a) => String(a.id) === form.unitId)?.label;
+    const typeLabel = form.packageType === "paquete" ? "Paquete" : "Documento";
+
+    if (DEMO_MODE) {
+      const res = await demoCreateCorrespondence({
+        condominium_id: condominiumId,
+        courier: form.courier,
+        unit_label: unitLabel,
+        type: typeLabel,
+        receiver: form.receiverName.trim(),
+        notes: form.notes.trim(),
+        status: "pending",
+      });
+      setList((prev) => [res.data, ...prev]);
+    }
+
+    setForm({
+      courier: "Servientrega",
+      unitId: "",
+      packageType: "documento",
+      receiverName: "",
+      notes: "",
+    });
+    clearPhoto();
+    setTab("pending");
   };
+
+  const handleDeliver = async (id) => {
+    if (!DEMO_MODE) return;
+    await demoDeliverCorrespondence(id);
+    const res = await demoFetchCorrespondences(condominiumId);
+    setList(res.data || []);
+    setTab("delivered");
+  };
+
+  const pending = list.filter((l) => l.status === "pending");
+  const delivered = list.filter((l) => l.status === "delivered");
 
   return (
     <div className="w-full">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-6">
-        {/* Header (igual a Visitantes) */}
-        <div className="mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="app-button-secondary px-4 py-2 text-sm"
+          >
+            ← Volver
+          </button>
+        </div>
+
+        <div className="mb-6 mt-4">
           <Kicker>Gestión de accesos</Kicker>
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -179,9 +243,7 @@ export default function CorrespondencePage() {
           </div>
         </div>
 
-        {/* Layout 2 columnas en desktop, 1 en mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* LEFT: Form */}
           <Card>
             <SectionTitle
               icon="📮"
@@ -190,7 +252,6 @@ export default function CorrespondencePage() {
             />
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              {/* Empresa / Unidad */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Empresa de mensajería</Label>
@@ -226,7 +287,6 @@ export default function CorrespondencePage() {
                 </div>
               </div>
 
-              {/* Tipo paquete (armónico: pills tipo selector) */}
               <div>
                 <Label>Tipo de paquete</Label>
                 <div className="mt-2 grid grid-cols-2 gap-3">
@@ -258,7 +318,6 @@ export default function CorrespondencePage() {
                 </div>
               </div>
 
-              {/* Evidencia */}
               <div>
                 <Label>Evidencia fotográfica</Label>
                 <Hint>Para la demo puedes cargar una imagen desde tu computador.</Hint>
@@ -311,7 +370,6 @@ export default function CorrespondencePage() {
                 )}
               </div>
 
-              {/* Datos entrega */}
               <div>
                 <SectionTitle icon="✍️" title="Datos de entrega" />
                 <div className="mt-4">
@@ -327,20 +385,9 @@ export default function CorrespondencePage() {
 
                 <div className="mt-4">
                   <Label>Firma de quien recibe</Label>
-                  <div
-                    ref={signatureBoxRef}
-                    className="mt-2 h-40 rounded-2xl border border-slate-200 bg-slate-50"
-                  >
-                    {/* 🔁 Aquí puedes montar tu canvas/componente de firma actual */}
-                  </div>
-
+                  <div className="mt-2 h-40 rounded-2xl border border-slate-200 bg-slate-50" />
                   <div className="mt-2 flex justify-start">
-                    <GhostButton
-                      onClick={() => {
-                        // aquí limpias tu canvas real
-                        alert("Limpiar firma (conecta tu canvas).");
-                      }}
-                    >
+                    <GhostButton onClick={() => {}}>
                       Limpiar firma
                     </GhostButton>
                   </div>
@@ -359,7 +406,7 @@ export default function CorrespondencePage() {
               </div>
 
               <PrimaryButton type="submit" disabled={!canSubmit}>
-                🧾 Registrar Entrega
+                🧾 Registrar entrega
               </PrimaryButton>
 
               {!canSubmit && (
@@ -370,19 +417,62 @@ export default function CorrespondencePage() {
             </form>
           </Card>
 
-          {/* RIGHT: Últimos registros */}
           <Card>
-            <SectionTitle
-              icon="🕘"
-              title="Últimos registros"
-              desc="Consulta rápida de correspondencias registradas recientemente."
-            />
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle
+                icon="🕘"
+                title="Registro de entregas"
+                desc="Gestiona pendientes y consulta el histórico."
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTab("pending")}
+                  className={[
+                    "rounded-xl px-3 py-2 text-xs font-extrabold border transition",
+                    tab === "pending"
+                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  ].join(" ")}
+                >
+                  Pendientes ({pending.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab("delivered")}
+                  className={[
+                    "rounded-xl px-3 py-2 text-xs font-extrabold border transition",
+                    tab === "delivered"
+                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  ].join(" ")}
+                >
+                  Entregados ({delivered.length})
+                </button>
+              </div>
+            </div>
 
             <div className="mt-6 space-y-3">
-              {!recent || recent.length === 0 ? (
-                <EmptyState />
-              ) : (
-                recent.map((r, idx) => <Row key={r?.id ?? idx} item={r} />)
+              {tab === "pending" && (
+                <>
+                  {pending.length === 0 ? (
+                    <EmptyState text="No hay pendientes en portería" />
+                  ) : (
+                    pending.map((r) => (
+                      <Row key={r.id} item={r} onDeliver={handleDeliver} />
+                    ))
+                  )}
+                </>
+              )}
+
+              {tab === "delivered" && (
+                <>
+                  {delivered.length === 0 ? (
+                    <EmptyState text="No hay entregas registradas" />
+                  ) : (
+                    delivered.map((r) => <Row key={r.id} item={r} />)
+                  )}
+                </>
               )}
             </div>
           </Card>

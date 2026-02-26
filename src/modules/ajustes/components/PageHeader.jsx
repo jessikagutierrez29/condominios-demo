@@ -4,9 +4,11 @@ export default function PageHeader({
   title,
   subtitle,
   showBack = false,
+  backTo = "/",
   rightSlot = null,
 }) {
   const navigate = useNavigate();
+  const canGoBack = typeof window !== "undefined" && window.history.length > 1;
 
   return (
     <div className="px-5 pt-6 pb-4">
@@ -15,10 +17,10 @@ export default function PageHeader({
           {showBack && (
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => (canGoBack ? navigate(-1) : navigate(backTo))}
               className="mt-1 text-blue-700 font-semibold"
             >
-              ←
+              ← Volver
             </button>
           )}
 

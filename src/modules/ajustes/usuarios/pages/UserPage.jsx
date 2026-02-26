@@ -44,7 +44,7 @@ export default function UsersPage() {
   }, [users, q]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="w-full">
       <div className="w-full max-w-4xl mx-auto">
 
         <PageHeader
@@ -113,7 +113,7 @@ export default function UsersPage() {
           })}
 
           {!loading && filtered.length === 0 && (
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 text-center text-slate-500">
+            <div className="app-card p-6 text-center text-slate-500">
               No se encontraron usuarios.
             </div>
           )}

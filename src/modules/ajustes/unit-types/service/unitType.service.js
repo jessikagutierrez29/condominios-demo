@@ -1,13 +1,23 @@
 import api from "../../../../service/api";
+import {
+  demoFetchUnitTypes,
+  demoCreateUnitType,
+  demoUpdateUnitType,
+  demoDeactivateUnitType,
+} from "../../../../service/demoStore";
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 export const fetchUnitTypes = (condominiumId) =>
-  api.get(`/core/unit-types?condominium_id=${condominiumId}`);
+  DEMO_MODE
+    ? demoFetchUnitTypes(condominiumId)
+    : api.get(`/core/unit-types?condominium_id=${condominiumId}`);
 
 export const createUnitType = (data) =>
-  api.post("/core/unit-types", data);
+  DEMO_MODE ? demoCreateUnitType(data) : api.post("/core/unit-types", data);
 
 export const updateUnitType = (id, data) =>
-  api.put(`/core/unit-types/${id}`, data);
+  DEMO_MODE ? demoUpdateUnitType(id, data) : api.put(`/core/unit-types/${id}`, data);
 
 export const deactivateUnitType = (id) =>
-  api.delete(`/core/unit-types/${id}`);
+  DEMO_MODE ? demoDeactivateUnitType(id) : api.delete(`/core/unit-types/${id}`);

@@ -11,8 +11,7 @@ import {
   Clock,
 } from "lucide-react";
 
-const inputBase =
-  "w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition";
+const inputBase = "app-input";
 
 const SectionTitle = ({ icon, title }) => (
   <div className="flex items-center gap-3">
@@ -24,7 +23,7 @@ const SectionTitle = ({ icon, title }) => (
 );
 
 const EmergencyContactCard = ({ icon, bgColor, iconColor, title, subtitle }) => (
-  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 flex items-start gap-4 hover:shadow-md transition">
+  <div className="app-card p-5 flex items-start gap-4 hover:shadow-md transition">
     <div className={`w-12 h-12 rounded-2xl ${bgColor} flex items-center justify-center`}>
       <div className={iconColor}>{icon}</div>
     </div>
@@ -108,7 +107,7 @@ export default function EmergenciesPage() {
         <form
           id="emergencyForm"
           onSubmit={handleSubmit}
-          className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 space-y-6"
+          className="app-card p-6 space-y-6"
         >
           <SectionTitle
             icon={<Siren size={18} />}

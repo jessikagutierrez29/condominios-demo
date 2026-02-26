@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --app-radius: 1.25rem;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+    font-family: "Manrope", "Segoe UI", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-slate-900;
+  }
+}
+
+@layer components {
+  .app-card {
+    @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
+  }
+
+  .app-input {
+    @apply w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-slate-900 outline-none transition focus:ring-2 focus:ring-blue-200;
+  }
+
+  .app-button-primary {
+    @apply inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500;
+  }
+
+  .app-button-secondary {
+    @apply inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50;
+  }
+
+  .app-title {
+    @apply text-2xl font-bold;
+  }
+
+  .app-subtitle {
+    @apply text-sm text-slate-500;
+  }
+}

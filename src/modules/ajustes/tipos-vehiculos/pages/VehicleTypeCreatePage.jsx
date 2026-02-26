@@ -31,9 +31,16 @@ export default function VehicleTypeCreatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="w-full">
       <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
-        {/* HEADER */}
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="app-button-secondary px-4 py-2 text-sm"
+        >
+          ← Volver
+        </button>
+
         <div className="space-y-2">
           <div className="text-sm text-slate-500">
             Ajustes <span className="mx-2">/</span>
@@ -47,15 +54,13 @@ export default function VehicleTypeCreatePage() {
           </h1>
         </div>
 
-        {/* ERROR */}
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
             ❌ {error}
           </div>
         )}
 
-        {/* CARD */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 space-y-6">
+        <div className="app-card p-6 space-y-6">
           <div>
             <p className="text-sm font-semibold text-slate-700">
               Nombre del tipo
@@ -64,16 +69,14 @@ export default function VehicleTypeCreatePage() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-2 w-full h-14 rounded-2xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-blue-200"
+              className="mt-2 app-input h-14"
               placeholder="Ej: Automóvil"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-slate-900">
-                Activo
-              </p>
+              <p className="font-semibold text-slate-900">Activo</p>
               <p className="text-sm text-slate-500">
                 Disponible para selección
               </p>
@@ -83,11 +86,10 @@ export default function VehicleTypeCreatePage() {
           </div>
         </div>
 
-        {/* BOTÓN */}
         <div className="flex justify-center pt-6">
           <button
             onClick={handleSave}
-            className="w-full sm:w-[520px] rounded-2xl py-4 text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xl"
+            className="app-button-primary w-full sm:w-[520px] py-4 text-lg font-semibold"
           >
             🚗 Crear tipo
           </button>
@@ -96,8 +98,6 @@ export default function VehicleTypeCreatePage() {
     </div>
   );
 }
-
-/* ---------- UI ---------- */
 
 function Switch({ checked, onChange }) {
   return (
